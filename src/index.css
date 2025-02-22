@@ -1,3 +1,89 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer components {
+  .counter-container {
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Pulsating animation */
+    .counter-container p {
+        transition: transform 0.3s ease;
+    }
+  .counter-container:hover p {
+    @apply scale-105;
+  }
+
+  /* Button click animation */
+  button {
+    transition: transform 0.1s ease;
+  }
+
+  button:active {
+    transform: scale(0.95);
+  }
+
+    /* Sparkle Animation */
+    .animate-sparkle {
+        position: relative;
+    }
+
+    .animate-sparkle::before,
+    .animate-sparkle::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) rotate(0deg); /* Initial rotation */
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background-color: #f0f9ff; /* Tailwind 'sky-100' - a very light blue */
+        opacity: 0;
+        animation: sparkle 0.3s ease-out forwards;
+    }
+  .animate-sparkle::after {
+        animation-delay: 0.1s; /* Stagger the second sparkle */
+    }
+
+
+    @keyframes sparkle {
+        0% {
+            width: 0;
+            height: 0;
+            opacity: 1;
+            transform: translate(-50%, -50%) rotate(0deg); /* Initial rotation */
+
+        }
+        50% {
+            width: 20px; /* Grow to 20px */
+            height: 20px;
+            opacity: 0.8;
+            transform: translate(-50%, -50%) rotate(180deg); /* Rotate halfway */
+        }
+        100% {
+            width: 30px; /* Slightly larger at the end */
+            height: 30px;
+            opacity: 0;
+            transform: translate(-50%, -50%) rotate(360deg); /* Full rotation */
+        }
+    }
+
+  /* Floating notification */
+  .notification {
+    animation: floatUpAndFade 2s forwards;
+  }
+}
+
+@keyframes floatUpAndFade {
+  0% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-40px);
+  }
+}

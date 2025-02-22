@@ -17,7 +17,7 @@ export function useGameState() {
     }, 2000);  // Every 2 seconds
 
     return () => clearInterval(interval);
-  }, []);
+  }, [state.populationGrowthRate]); // Added populationGrowthRate to dependency array
 
   // Unlock features based on population growth and other conditions
     useEffect(() => {
@@ -177,7 +177,7 @@ export function useGameState() {
 
   const purchaseAutoProducer = useCallback(() => {
     setState(prev => {
-      const cost = 200 * (prev.autoProducer + 1);
+      const cost = 200 * (state.autoProducer + 1);
       if (prev.emotionalEssence < cost) return prev;
 
       return {
