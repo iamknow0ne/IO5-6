@@ -10,11 +10,16 @@
 
   /* Pulsating animation */
     .counter-container p {
-        transition: transform 0.3s ease;
+        transition: transform 0.3s ease, font-size 0.2s ease; /* Added font-size transition */
     }
   .counter-container:hover p {
     @apply scale-105;
   }
+
+    /* Increase font-size on update */
+    .counter-increase {
+        font-size: 1.2em !important; /* Use !important to override inline styles if necessary */
+    }
 
   /* Button click animation */
   button {

@@ -1,5 +1,13 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useGameState } from './hooks/useGameState';
+import CoreCounters from './components/CoreCounters';
+import Actions from './components/Actions';
+import Automation from './components/Automation';
+import Upgrades from './components/Upgrades';
+import Research from './components/Research';
+import PublicOpinion from './components/PublicOpinion';
+import Events from './components/Events';
+import { Representative } from './types/game';
 import { Brain, Factory, TestTube2, Share2, Users, Zap, Bot, TrendingDown, TrendingUp, BookOpen, ThumbsUp, ThumbsDown, AlertTriangle } from 'lucide-react';
 
 function App() {
@@ -12,32 +20,43 @@ function App() {
     purchaseAutoHarvester,
     purchaseAutoProducer,
     upgradeEfficiency,
-    purchaseResearch
+    purchaseResearch,
+    decreasePopulation, // Get the new function
+    convertPopulation
   } = useGameState();
 
-  const [notifications, setNotifications] = useState<{ id: number; text: string; top: number; left: number }[]>([]);
+  const [notifications, setNotifications] = useState<{ id: number; text: string; top: number; left: number, icon?: React.ReactNode }[]>([]); // Added icon
   const notificationId = useRef(0);
+  const [researchProgress, setResearchProgress] = useState<{ [key: string]: number }>({}); // Track research progress
+  const [representatives, setRepresentatives] = useState<Representative[]>([]);
+  const containerRef = useRef<HTMLDivElement>(null); // Ref for the container
 
-  const addNotification = (text: string, top: number, left: number) => {
+  const addNotification = (text: string, top: number, left: number, icon?: React.ReactNode) => { // Added icon parameter
     const id = notificationId.current++;
-    setNotifications(prev => [...prev, { id, text, top, left }]);
+    setNotifications(prev => [...prev, { id, text, top, left, icon }]); // Store the icon
     setTimeout(() => {
       setNotifications(prev => prev.filter(n => n.id !== id));
     }, 2000);
   };
 
-    // Simplified handleResourceChange (no longer needs the action function)
-    const handleResourceChange = (resourceName: string, amount: number, elementId: string) => {
-        const element = document.getElementById(elementId);
-        if (element) {
-            const rect = element.getBoundingClientRect();
-            const top = rect.top + window.scrollY;
-            const left = rect.left + rect.width / 2 + window.scrollX;
-            addNotification(`${amount > 0 ? '+' : ''}${amount} ${resourceName}`, top - 40, left); // Show notification
-        }
-    };
+  // Simplified handleResourceChange (no longer needs the action function)
+  const handleResourceChange = (resourceName: string, amount: number, elementId: string, icon?: React.ReactNode) => { // Added icon
+    const element = document.getElementById(elementId);
+    if (element) {
+      const rect = element.getBoundingClientRect();
+      const top = rect.top + window.scrollY;
+      const left = rect.left + rect.width / 2 + window.scrollX;
+      addNotification(`${amount > 0 ? '+' : ''}${amount} ${resourceName}`, top - 40, left, icon); // Show notification, pass icon
 
-    // Simplified handleButtonClick (only handles adding/removing the animation class)
+      // Add dynamic size class
+      element.classList.add('counter-increase');
+      setTimeout(() => {
+        element.classList.remove('counter-increase');
+      }, 300); // Match CSS animation duration
+    }
+  };
+
+  // Simplified handleButtonClick (only handles adding/removing the animation class)
   const handleButtonClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     const button = event.currentTarget;
     button.classList.add('animate-sparkle');
@@ -48,17 +67,202 @@ function App() {
 
   const percentConverted = ((state.O / (state.O + state.I)) * 100).toFixed(1);
   const textColor = `rgb(${255 - (255 * Number(percentConverted) / 100)})`;
-    const backgroundColor = `rgba(${255 * (Number(percentConverted) / 100)}, 0, ${255 - (255 * (Number(percentConverted) / 100))}, 0.1)`;
+  const backgroundColor = `rgba(${255 * (Number(percentConverted) / 100)}, 0, ${255 - (255 * (Number(percentConverted) / 100))}, 0.1)`;
 
-    const publicOpinionIcon = () => {
-        if (state.publicOpinion >= 75) {
-            return <ThumbsUp className="w-6 h-6 text-green-500" />;
-        } else if (state.publicOpinion >= 25) {
-            return <TrendingUp className="w-6 h-6 text-yellow-500" />;
-        } else {
-            return <TrendingDown className="w-6 h-6 text-red-500" />;
+  const publicOpinionIcon = () => {
+    if (state.publicOpinion >= 75) {
+      return <ThumbsUp className="w-6 h-6 text-green-500" />;
+    } else if (state.publicOpinion >= 25) {
+      return <TrendingUp className="w-6 h-6 text-yellow-500" />;
+    } else {
+      return <TrendingDown className="w-6 h-6 text-red-500" />;
+    }
+  };
+
+  // Function to start research progress
+  const startResearchProgress = (researchKey: string, duration: number) => {
+    setResearchProgress(prev => ({ ...prev, [researchKey]: 0 }));
+    const interval = setInterval(() => {
+      setResearchProgress(prev => {
+        const currentProgress = prev[researchKey] || 0;
+        if (currentProgress >= 100) {
+          clearInterval(interval);
+          return prev;
         }
+        return { ...prev, [researchKey]: currentProgress + (100 / (duration / 100)) }; // Update every 100ms
+      });
+    }, 100);
+  };
+
+  // Manage representatives in state (add/remove)
+  useEffect(() => {
+    const maxReps = 20;
+    const currentIReps = representatives.filter(r => r.type === 'I').length;
+    const currentOReps = representatives.filter(r => r.type === 'O').length;
+    const targetIReps = Math.min(state.I / 10, maxReps);  // One 'I' rep per 10 I
+    const targetOReps = Math.min(state.O / 10, maxReps); // One 'O' rep per 10 O
+
+    let newReps = [...representatives];
+
+    // Add or remove I representatives
+    const iDiff = targetIReps - currentIReps;
+    if (iDiff > 0) {
+      for (let i = 0; i < iDiff; i++) {
+        newReps.push({
+          id: `I-${Date.now()}-${i}`,
+          type: 'I',
+          top: Math.random() * 100,
+          left: Math.random() * 100,
+          dx: (Math.random() * 2) - 1,
+          dy: (Math.random() * 2) - 1,
+          size: Math.min(2 + (state.I / 10) * 0.2, 10), // Scale size, max 10px
+        });
+      }
+    } else if (iDiff < 0) {
+      let iCount = 0;
+      newReps = newReps.filter(rep => {
+        if (rep.type === 'I') {
+          iCount++;
+          return iCount <= targetIReps;
+        }
+        return true;
+      });
+    }
+
+    // Add or remove O representatives
+    const oDiff = targetOReps - currentOReps;
+    if (oDiff > 0) {
+      for (let i = 0; i < oDiff; i++) {
+        newReps.push({
+          id: `O-${Date.now()}-${i}`,
+          type: 'O',
+          top: Math.random() * 100,
+          left: Math.random() * 100,
+          dx: (Math.random() * 2) - 1,
+          dy: (Math.random() * 2) - 1,
+          size: Math.min(2 + (state.O / 10) * 0.2, 10), // Scale size, max 10px
+        });
+      }
+    } else if (oDiff < 0) {
+      let oCount = 0;
+      newReps = newReps.filter(rep => {
+        if (rep.type === 'O') {
+          oCount++;
+          return oCount <= targetOReps;
+        }
+        return true;
+      });
+    }
+
+    setRepresentatives(newReps);
+  }, [state.I, state.O]);
+
+
+  // Update representative positions (bouncing) using requestAnimationFrame
+  useEffect(() => {
+    if (!containerRef.current) return;
+
+    const container = containerRef.current;
+    const containerWidth = container.offsetWidth;
+    const containerHeight = container.offsetHeight;
+
+    let animationFrameId: number;
+
+    const updatePositions = () => {
+      setRepresentatives(prevReps =>
+        prevReps.map(rep => {
+          let { top, left, dx, dy, size, type, id } = rep;
+
+          // Update position based on velocity
+          let newTop = top + dy * 0.5;  // Adjust speed here
+          let newLeft = left + dx * 0.5;
+
+          // Bounce off top/bottom walls (adjusting for size)
+          if (newTop < 0) {
+            newTop = 0;
+            dy = -dy;
+          } else if (newTop > (100 - (size / containerHeight) * 100)) {
+            newTop = 100 - (size / containerHeight) * 100;
+            dy = -dy;
+          }
+
+          // Bounce off left/right walls
+          if (newLeft < 0) {
+            newLeft = 0;
+            dx = -dx;
+          } else if (newLeft > (100 - (size / containerWidth) * 100)) {
+            newLeft = 100 - (size / containerWidth) * 100;
+            dx = -dx;
+          }
+
+          // Collision detection (only during events)
+          if (state.events.active && (state.events.type === 'civil war' || state.events.type === 'pay raise')) {
+            for (const otherRep of prevReps) {
+              if (otherRep.id === rep.id) continue; // Don't collide with self
+
+              // Simple bounding box collision detection
+              const repLeft = (newLeft / 100) * containerWidth;
+              const repTop = (newTop / 100) * containerHeight;
+              const otherRepLeft = (otherRep.left / 100) * containerWidth;
+              const otherRepTop = (otherRep.top / 100) * containerHeight;
+
+
+              if (
+                repLeft < otherRepLeft + otherRep.size &&
+                repLeft + rep.size > otherRepLeft &&
+                repTop < otherRepTop + otherRep.size &&
+                repTop + rep.size > otherRepTop
+              ) {
+                // Collision detected!
+                if (state.events.type === 'civil war') {
+                  // Civil War: Both dots disappear
+                  decreasePopulation(rep.type, 10); // Assuming clusterSize = 10
+                  decreasePopulation(otherRep.type, 10);
+                  return null; // Remove the current representative
+
+                } else if (state.events.type === 'pay raise' && rep.type === "O" && otherRep.type === "I") {
+                  // Pay Raise: Convert O to I
+                  convertPopulation()
+                  return { ...rep, type: "I", dx: otherRep.dx, dy: otherRep.dy, size: otherRep.size, id: rep.id }
+                } else {
+                  return { ...rep, top: newTop, left: newLeft, dx, dy };
+                }
+              }
+            }
+          }
+
+          return { ...rep, top: newTop, left: newLeft, dx, dy };
+        }).filter(rep => rep !== null) as Representative[] //removes null from collisions
+      );
+
+      animationFrameId = requestAnimationFrame(updatePositions);
     };
+
+    animationFrameId = requestAnimationFrame(updatePositions);
+
+    return () => cancelAnimationFrame(animationFrameId);
+  }, [state.events.active, state.events.type, decreasePopulation, convertPopulation]);  //  dependency array is correct
+
+  // Memoize the representative elements
+  const representativeElements = useMemo(() => {
+    return representatives.map((rep) => (
+      <div
+        key={rep.id}
+        className={`w-2 h-2 rounded-full absolute ${rep.type === 'I' ? 'bg-blue-500' : 'bg-red-500'}`}
+        style={{
+          top: `${rep.top}%`,
+          left: `${rep.left}%`,
+          transform: `translate(${rep.translateX}px, ${rep.translateY}px)`,
+          transition: 'transform 0.016s linear', // 60 FPS
+          width: `${rep.size}px`,
+          height: `${rep.size}px`,
+          opacity: rep.type === 'I' ? Math.min(1, 0.3 + (rep.size / 10) * 0.7) : Math.min(1, 0.3 + (rep.size / 10) * 0.7), // Adjust opacity based on size
+        }}
+      />
+    ));
+  }, [representatives]);
+
+
 
   return (
     <div className="min-h-screen bg-gray-900 text-white p-6 transition-colors duration-500" style={{ backgroundColor: backgroundColor }}>
@@ -68,239 +272,63 @@ function App() {
         </h1>
 
         {/* Core Counters */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
-          <div className="bg-gray-800 p-4 rounded-lg border border-gray-700 counter-container">
-            <div className="flex items-center gap-2 mb-1">
-              <Users className="w-5 h-5 text-blue-400" />
-              <h2 className="font-semibold text-blue-400">I</h2>
-            </div>
-            <p id="counter-I" className="text-3xl text-blue-400">{state.I}</p>
-          </div>
-          <div className="bg-gray-800 p-4 rounded-lg border border-gray-700 counter-container">
-            <div className="flex items-center gap-2 mb-1">
-              <Users className="w-5 h-5 text-red-400" />
-              <h2 className="font-semibold text-red-400">O</h2>
-            </div>
-            <p id="counter-O" className="text-3xl text-red-400">{state.O}</p>
-          </div>
-          {state.discoveredFeatures.harvesting && (
-            <div className="bg-gray-800 p-4 rounded-lg border border-gray-700 counter-container">
-              <div className="flex items-center gap-2 mb-1">
-                <Brain className="w-5 h-5 text-purple-400" />
-                <h2 className="font-semibold text-purple-400">Essence</h2>
-              </div>
-              <p id="counter-Essence" className="text-2xl text-purple-400">{Math.floor(state.emotionalEssence)}</p>
-            </div>
-          )}
-          {state.discoveredFeatures.production && (
-            <div className="bg-gray-800 p-4 rounded-lg border border-gray-700 counter-container">
-              <div className="flex items-center gap-2 mb-1">
-                <TestTube2 className="w-5 h-5 text-green-400" />
-                <h2 className="font-semibold text-green-400">Doses</h2>
-              </div>
-              <p id="counter-Doses" className="text-2xl text-green-400">{state.doses}</p>
-            </div>
-          )}
-          {state.discoveredFeatures.automation && (
-            <div className="bg-gray-800 p-4 rounded-lg border border-gray-700 counter-container">
-              <div className="flex items-center gap-2 mb-1">
-                <Share2 className="w-5 h-5 text-yellow-400" />
-                <h2 className="font-semibold text-yellow-400">Distributors</h2>
-              </div>
-              <p id="counter-Distributors" className="text-2xl text-yellow-400">{state.distributors}</p>
-            </div>
-          )}
-          {state.discoveredFeatures.research && (
-            <div className="bg-gray-800 p-4 rounded-lg border border-gray-700 counter-container">
-              <div className="flex items-center gap-2 mb-1">
-                <BookOpen className="w-5 h-5 text-teal-400" />
-                <h2 className="font-semibold text-teal-400">Research</h2>
-              </div>
-              <p id="counter-Research" className="text-2xl text-teal-400">{state.researchPoints}</p>
-            </div>
-          )}
-        </div>
+        <CoreCounters
+          I={state.I}
+          O={state.O}
+          emotionalEssence={state.emotionalEssence}
+          doses={state.doses}
+          distributors={state.distributors}
+          researchPoints={state.researchPoints}
+          discoveredFeatures={state.discoveredFeatures}
+        />
 
         {/* Actions */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-          {state.discoveredFeatures.harvesting && (
-            <button
-                onClick={(e) => {
-                    handleButtonClick(e); // Add sparkle
-                    harvestEssence();  // Call the action directly
-                    handleResourceChange('Essence', Math.floor((state.efficiencies.harvesting * (state.events.type === 'outcry' ? 0.5 : 1) * state.I) / 25), 'counter-Essence'); // Update notification
-                }}
-              className="bg-indigo-600 hover:bg-indigo-700 p-3 rounded-lg transition flex items-center justify-center gap-2 group relative"
-            >
-              <Brain className="w-5 h-5 transition-transform group-hover:rotate-12" />
-              Harvest
-            </button>
-          )}
-          {state.discoveredFeatures.production && (
-            <button
-                onClick={(e) => {
-                    handleButtonClick(e);
-                    produceDose();
-                    handleResourceChange('Doses', 1, 'counter-Doses');
-                }}
-              className="bg-purple-600 hover:bg-purple-700 p-3 rounded-lg transition flex items-center justify-center gap-2 group relative"
-              disabled={state.emotionalEssence < 8 / state.efficiencies.production}
-            >
-              <TestTube2 className="w-5 h-5 transition-transform group-hover:scale-110" />
-              Produce
-            </button>
-          )}
-          {state.discoveredFeatures.distribution && (
-            <button
-                onClick={(e) => {
-                    handleButtonClick(e);
-                    const numToConvert = Math.min(state.efficiencies.distribution, state.I);
-                    distributeDose();
-                    handleResourceChange('I/O', numToConvert, 'counter-I');
-                }}
-              className="bg-blue-600 hover:bg-blue-700 p-3 rounded-lg transition flex items-center justify-center gap-2 group relative"
-              disabled={state.doses < 1 || state.I < 1}
-            >
-              <Share2 className="w-5 h-5 transition-transform group-hover:rotate-45" />
-              Distribute
-            </button>
-          )}
-          {state.discoveredFeatures.automation && (
-            <button
-                onClick={(e) => {
-                    handleButtonClick(e);
-                    hireDistributor();
-                    handleResourceChange( 'Distributors', 1, 'counter-Distributors');
-                }}
-              className="bg-green-600 hover:bg-green-700 p-3 rounded-lg transition flex items-center justify-center gap-2 group relative"
-              disabled={state.emotionalEssence < 75 * (state.distributors + 1)}
-            >
-              <Users className="w-5 h-5 transition-transform group-hover:scale-125" />
-              Hire
-            </button>
-          )}
-        </div>
+        <Actions
+          state={state}
+          harvestEssence={harvestEssence}
+          produceDose={produceDose}
+          distributeDose={distributeDose}
+          hireDistributor={hireDistributor}
+          handleButtonClick={handleButtonClick}
+          handleResourceChange={handleResourceChange}
+        />
 
         {/* Automation */}
-        {state.discoveredFeatures.automation && (
-          <div className="grid grid-cols-2 gap-4 mb-6">
-            <div className="bg-gray-800 p-4 rounded-lg border border-gray-700">
-              <button
-                onClick={(e) => {
-                    handleButtonClick(e);
-                    purchaseAutoHarvester();
-                    handleResourceChange('Auto Harvester', 1, 'counter-Essence');
-                }}
-                className="bg-orange-600 hover:bg-orange-700 w-full p-3 rounded-lg transition flex items-center gap-2 group relative"
-                disabled={state.emotionalEssence < 150 * (state.autoHarvester + 1)}
-              >
-                <Bot className="w-5 h-5 transition-transform group-hover:rotate-6" />
-                <div>
-                  <div className="text-sm">Auto Harvester</div>
-                  <div className="text-xs text-orange-300">Level {state.autoHarvester}</div>
-                  <div className="text-xs text-orange-200">Cost: {150 * (state.autoHarvester + 1)}</div>
-                </div>
-              </button>
-            </div>
-            <div className="bg-gray-800 p-4 rounded-lg border border-gray-700">
-              <button
-                onClick={(e) => {
-                    handleButtonClick(e);
-                    purchaseAutoProducer();
-                    handleResourceChange('Auto Producer', 1, 'counter-Essence');
-
-                }}
-                className="bg-pink-600 hover:bg-pink-700 w-full p-3 rounded-lg transition flex items-center gap-2 group relative"
-                disabled={state.emotionalEssence < 200 * (state.autoProducer + 1)}
-              >
-                <Factory className="w-5 h-5 transition-transform group-hover:scale-110" />
-                <div>
-                  <div className="text-sm">Auto Producer</div>
-                  <div className="text-xs text-pink-300">Level {state.autoProducer}</div>
-                  <div className="text-xs text-pink-200">Cost: {200 * (state.autoProducer + 1)}</div>
-                </div>
-              </button>
-            </div>
-          </div>
-        )}
+        <Automation
+          state={state}
+          purchaseAutoHarvester={purchaseAutoHarvester}
+          purchaseAutoProducer={purchaseAutoProducer}
+          handleButtonClick={handleButtonClick}
+          handleResourceChange={handleResourceChange}
+        />
 
         {/* Upgrades */}
-        {state.discoveredFeatures.upgrades && (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-            {Object.entries(state.efficiencies).map(([type, level]) => (
-              <button
-                key={type}
-                onClick={(e) => {
-                    handleButtonClick(e);
-                    upgradeEfficiency(type as keyof typeof state.efficiencies);
-                    handleResourceChange('Upgrade', 1, 'counter-Essence');
-                }}
-                className="bg-gray-800 hover:bg-gray-700 p-3 rounded-lg transition border border-gray-700 group relative"
-                disabled={state.emotionalEssence < 40 * (level + 1)}
-              >
-                <div className="flex items-center justify-between gap-2 mb-1">
-                  <Zap className="w-5 h-5 transition-transform group-hover:scale-125" />
-                  <h3 className="font-semibold capitalize">{type}</h3>
-                </div>
-                <p className="text-sm">Level {level}</p>
-                <p className="text-xs text-gray-400">Cost: {40 * (level + 1)}</p>
-              </button>
-            ))}
-          </div>
-        )}
+        <Upgrades
+          state={state}
+          upgradeEfficiency={upgradeEfficiency}
+          handleButtonClick={handleButtonClick}
+          handleResourceChange={handleResourceChange}
+        />
 
         {/* Research */}
-        {state.discoveredFeatures.research && (
-            <div className="mb-6">
-                <h2 className="text-2xl font-bold mb-2">Research</h2>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    {Object.entries(state.research).map(([key, researchItem]) => (
-                        <button
-                            key={key}
-                            onClick={(e) => {
-                                handleButtonClick(e);
-                                purchaseResearch(key);
-                                handleResourceChange('Research', 1, 'counter-Research')
-                            }}
-                            className={`bg-gray-800 hover:bg-gray-700 p-3 rounded-lg transition border ${researchItem.purchased ? 'border-green-500' : 'border-gray-700'} group relative`}
-                            disabled={researchItem.purchased || state.researchPoints < researchItem.cost}
-                        >
-                            <div className="flex items-center justify-between gap-2 mb-1">
-                                <h3 className="font-semibold">{researchItem.name}</h3>
-                            </div>
-                            <p className="text-sm">{researchItem.effect}</p>
-                            <p className="text-xs text-gray-400">Cost: {researchItem.cost} RP</p>
-                            {researchItem.purchased && <p className="text-xs text-green-500">Purchased</p>}
-                        </button>
-                    ))}
-                </div>
-            </div>
-        )}
+        <Research
+          state={state}
+          researchProgress={researchProgress}
+          startResearchProgress={startResearchProgress}
+          purchaseResearch={purchaseResearch}
+          handleButtonClick={handleButtonClick}
+          handleResourceChange={handleResourceChange}
+          setResearchProgress={setResearchProgress}
+        />
 
         {/* Public Opinion */}
-        {state.discoveredFeatures.publicRelations && (
-            <div className="bg-gray-800 p-4 rounded-lg border border-gray-700 mb-6 flex items-center justify-between">
-                <div className='flex items-center gap-2'>
-                    {publicOpinionIcon()}
-                    <h2 className="text-lg font-semibold">Public Opinion:</h2>
-                </div>
-
-                <span className="text-xl">{state.publicOpinion}</span>
-            </div>
-        )}
+        <PublicOpinion
+          state={state}
+          publicOpinionIcon={publicOpinionIcon}
+        />
 
         {/* Events */}
-        {state.events.active && state.discoveredFeatures.events && (
-          <div className="bg-red-900/50 p-4 rounded-lg mb-6 text-center border border-red-700 transition-all animate-pulse">
-            <p className="text-lg flex items-center justify-center gap-2">
-              <AlertTriangle className="w-5 h-5" />
-              {state.events.type === 'resistance' && "Resistance Attack: Doses destroyed!"}
-              {state.events.type === 'outcry' && "Public Outcry: Harvesting efficiency halved!"}
-              {state.events.type === 'equipment' && "Equipment Failure: Automation disabled!"}
-              {state.events.type === 'supply' && "Supply Disruption: Production costs doubled!"}
-            </p>
-          </div>
-        )}
+        <Events state={state} />
 
         {/* Progress */}
         <div className="bg-gray-800 p-4 rounded-lg border border-gray-700">
@@ -321,11 +349,18 @@ function App() {
           <div
             key={n.id}
             className="absolute pointer-events-none text-white text-sm p-1 rounded transition-opacity duration-1000 notification"
-            style={{ top: n.top, left: n.left}}
+            style={{ top: n.top, left: n.left }}
           >
-            {n.text}
+            {n.icon} {n.text}
           </div>
         ))}
+      </div>
+      {/* Wandering Representatives */}
+      <div className="border border-gray-700 rounded-lg p-4 mt-6 h-64 relative overflow-hidden">
+        <div ref={containerRef} className="absolute inset-0">
+          {representativeElements}
+        </div>
+        <p className="text-center text-gray-400">Population Dynamics</p>
       </div>
     </div>
   );
