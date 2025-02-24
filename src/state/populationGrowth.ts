@@ -13,7 +13,7 @@ export const usePopulationGrowth = ({ state, setState, setGrowthAccumulator, set
   useEffect(() => {
     const interval = setInterval(() => {
       setState(prev => {
-        let growthRate = prev.populationGrowthRate / 100 / 20; // Divide by 20 for 100ms interval
+        let growthRate = Math.max(prev.populationGrowthRate / 100 / 20, 3000 / 100 / 20); // Ensure minimum growth rate of 3000
 
         // Exponential growth based on current population
         let growthFactor = 1 + (prev.I / 1000); // Adjust the divisor to control the rate of exponential growth

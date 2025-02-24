@@ -8,7 +8,7 @@ import Research from './components/Research';
 import PublicOpinion from './components/PublicOpinion';
 import Events from './components/Events';
 import { Representative } from './types/game';
-import { Brain, Factory, TestTube2, Share2, Users, Zap, Bot, TrendingDown, TrendingUp, BookOpen, ThumbsUp, ThumbsDown, AlertTriangle } from 'lucide-react';
+import { TrendingDown, TrendingUp, ThumbsUp } from 'lucide-react';
 
 function App() {
   const {
@@ -21,7 +21,7 @@ function App() {
     purchaseAutoProducer,
     upgradeEfficiency,
     purchaseResearch,
-    decreasePopulation, // Get the new function
+    decreasePopulation,
     convertPopulation
   } = useGameState();
 
@@ -116,6 +116,8 @@ function App() {
           dx: (Math.random() * 2) - 1,
           dy: (Math.random() * 2) - 1,
           size: Math.min(2 + (state.I / 10) * 0.2, 10), // Scale size, max 10px
+          translateX: 0,
+          translateY: 0
         });
       }
     } else if (iDiff < 0) {
@@ -141,6 +143,8 @@ function App() {
           dx: (Math.random() * 2) - 1,
           dy: (Math.random() * 2) - 1,
           size: Math.min(2 + (state.O / 10) * 0.2, 10), // Scale size, max 10px
+          translateX: 0,
+          translateY: 0
         });
       }
     } else if (oDiff < 0) {
@@ -155,7 +159,7 @@ function App() {
     }
 
     setRepresentatives(newReps);
-  }, [state.I, state.O]);
+  }, [state.I, state.O, representatives]);
 
   // Update representative positions (bouncing) using requestAnimationFrame
   useEffect(() => {
@@ -180,18 +184,26 @@ function App() {
           if (newTop < 0) {
             newTop = 0;
             dy = -dy;
+            // Add visual effect
+            rep.translateY = -10; // Move up slightly
           } else if (newTop > (100 - (size / containerHeight) * 100)) {
             newTop = 100 - (size / containerHeight) * 100;
             dy = -dy;
+            // Add visual effect
+            rep.translateY = 10; // Move down slightly
           }
 
           // Bounce off left/right walls
           if (newLeft < 0) {
             newLeft = 0;
             dx = -dx;
+            // Add visual effect
+            rep.translateX = -10; // Move left slightly
           } else if (newLeft > (100 - (size / containerWidth) * 100)) {
             newLeft = 100 - (size / containerWidth) * 100;
             dx = -dx;
+            // Add visual effect
+            rep.translateX = 10; // Move right slightly
           }
 
           // Collision detection (only during events)
@@ -239,26 +251,48 @@ function App() {
     animationFrameId = requestAnimationFrame(updatePositions);
 
     return () => cancelAnimationFrame(animationFrameId);
-  }, [state.events.active, state.events.type, decreasePopulation, convertPopulation]);  //  dependency array is correct
+  }, [state.events.active, state.events.type, decreasePopulation, convertPopulation, representatives]);  //  dependency array is correct
 
   // Memoize the representative elements
-  const representativeElements = useMemo(() => {
-    return representatives.map((rep) => (
-      <div
-        key={rep.id}
-        className={`w-2 h-2 rounded-full absolute ${rep.type === 'I' ? 'bg-blue-500' : 'bg-red-500'}`}
-        style={{
-          top: `${rep.top}%`,
-          left: `${rep.left}%`,
-          transform: `translate(${rep.translateX}px, ${rep.translateY}px)`,
-          transition: 'transform 0.016s linear', // 60 FPS
-          width: `${rep.size}px`,
-          height: `${rep.size}px`,
-          opacity: rep.type === 'I' ? Math.min(1, 0.3 + (rep.size / 10) * 0.7) : Math.min(1, 0.3 + (rep.size / 10) * 0.7), // Adjust opacity based on size
-        }}
-      />
-    ));
-  }, [representatives]);
+const representativeElements = useMemo(() => {
+  return representatives.map((rep) => (
+    <div
+      key={rep.id}
+      className={`w-2 h-2 rounded-full absolute ${rep.type === 'I' ? 'bg-blue-500' : 'bg-red-500'}`}
+      style={{
+        top: `${rep.top}%`,
+        left: `${rep.left}%`,
+        transform: `translate(${rep.translateX}px, ${rep.translateY}px)`,
+        transition: 'transform 0.016s linear', // 60 FPS
+        width: `${rep.size}px`,
+        height: `${rep.size}px`,
+        opacity: rep.type === 'I' ? Math.min(1, 0.3 + (rep.size / 10) * 0.7) : Math.min(1, 0.3 + (rep.size / 10) * 0.7), // Adjust opacity based on size
+        animation: `move ${Math.random() * 2 + 1}s infinite linear`, // Add random movement
+      }}
+    />
+  ));
+}, [representatives]);
+
+<style>{`
+  @keyframes move {
+    0% {
+      transform: translate(0, 0);
+    }
+    25% {
+      transform: translate(10px, 10px);
+    }
+    50% {
+      transform: translate(0, 0);
+    }
+    75% {
+      transform: translate(-10px, -10px);
+    }
+    100% {
+      transform: translate(0, 0);
+    }
+  }
+`}
+</style>
 
   return (
     <div className="min-h-screen bg-gray-900 text-white p-6 transition-colors duration-500" style={{ backgroundColor: backgroundColor }}>
@@ -352,15 +386,71 @@ function App() {
         ))}
       </div>
       {/* Wandering Representatives */}
-      <div className="border border-gray-700 rounded-lg p-4 mt-6 h-64 relative overflow-hidden">
-        <div ref={containerRef} className="absolute inset-0">
-          {representativeElements}
-        </div>
-        <p className="text-center text-gray-400">Population Dynamics</p>
-      </div>
+<div className="population-dynamics-box">
+  <div ref={containerRef} className="absolute inset-0">
+    {representativeElements}
+  </div>
+  <p className="text-center text-gray-400">Population Dynamics</p>
+  <div className="dynamic-elements">
+    <div className="dynamic-element"></div>
+    <div className="dynamic-element"></div>
+    <div className="dynamic-element"></div>
+  </div>
+</div>
       {/* Animated Background */}
       <div className="stars">
         <div className="star"></div>
+<style>{`
+  .population-dynamics-box {
+    width: 40%;
+    height: auto;
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background-color: rgba(0, 0, 0, 0.7);
+    border-radius: 8px;
+    padding: 16px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+  }
+
+  .dynamic-elements {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+
+  .dynamic-element {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background-color: rgba(255, 255, 255, 0.5);
+    border-radius: 50%;
+    animation: move 3s infinite linear;
+  }
+
+  @keyframes move {
+    0% {
+      transform: translate(0, 0);
+    }
+    25% {
+      transform: translate(10px, 10px);
+    }
+    50% {
+      transform: translate(0, 0);
+    }
+    75% {
+      transform: translate(-10px, -10px);
+    }
+    100% {
+      transform: translate(0, 0);
+    }
+  }
+`}
+</style>
         <div className="star"></div>
         <div className="star"></div>
         <div className="star"></div>

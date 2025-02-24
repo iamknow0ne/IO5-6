@@ -1,13 +1,17 @@
 import React from 'react';
 import { BookOpen } from 'lucide-react';
+import { motion } from 'framer-motion';
+
+import { GameState } from '../types/game';
 
 interface ResearchProps {
-  state: any;
+  state: GameState;
   purchaseResearch: (researchKey: string) => void;
   startResearchProgress: (researchKey: string, duration: number) => void;
   researchProgress: { [key: string]: number };
   handleButtonClick: (event: React.MouseEvent<HTMLButtonElement>) => void;
   handleResourceChange: (resourceName: string, amount: number, elementId: string, icon?: React.ReactNode) => void;
+  setResearchProgress: React.Dispatch<React.SetStateAction<{ [key: string]: number }>>;
 }
 
 const Research: React.FC<ResearchProps> = ({
@@ -16,7 +20,8 @@ const Research: React.FC<ResearchProps> = ({
   startResearchProgress,
   researchProgress,
   handleButtonClick,
-  handleResourceChange
+  handleResourceChange,
+  setResearchProgress
 }) => {
   return (
     state.discoveredFeatures.research && (
@@ -35,7 +40,7 @@ const Research: React.FC<ResearchProps> = ({
                   handleResourceChange('Research', 1, 'counter-Research', <BookOpen className="w-4 h-4 text-teal-400 inline-block" />);
                 }
               }}
-              className={`bg-gray-800 hover:bg-gray-700 p-3 rounded-lg transition border ${researchItem.purchased ? 'border-green-500' : 'border-gray-700'} group relative`}
+              className={`bg-gray-800 hover:bg-gray-700 p-3 rounded-lg transition duration-300 ease-in-out transform hover:scale-105 border ${researchItem.purchased ? 'border-green-500' : 'border-gray-700'} group relative`}
               disabled={researchItem.purchased || state.researchPoints < researchItem.cost}
             >
               <div className="flex items-center justify-between gap-2 mb-1">

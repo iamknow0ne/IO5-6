@@ -1,8 +1,11 @@
 import React from 'react';
 import { AlertTriangle } from 'lucide-react';
+import { motion } from 'framer-motion';
+
+import { GameState } from '../types/game';
 
 interface EventsProps {
-  state: any;
+  state: GameState;
 }
 
 const Events: React.FC<EventsProps> = ({
@@ -12,7 +15,12 @@ const Events: React.FC<EventsProps> = ({
     state.events.active && state.discoveredFeatures.events && (
       <div className="bg-red-900/50 p-4 rounded-lg mb-6 text-center border border-red-700 transition-all animate-pulse">
         <p className="text-lg flex items-center justify-center gap-2">
-          <AlertTriangle className="w-5 h-5" />
+          <motion.div
+  animate={{ rotate: [0, 360] }}
+  transition={{ duration: 2, repeat: Infinity }}
+>
+  <AlertTriangle className="w-5 h-5" />
+</motion.div>
           {state.events.type === 'resistance' && "Resistance Attack: Doses destroyed!"}
           {state.events.type === 'outcry' && "Public Outcry: Harvesting efficiency halved!"}
           {state.events.type === 'equipment' && "Equipment Failure: Automation disabled!"}

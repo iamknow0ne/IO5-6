@@ -45,6 +45,18 @@ export interface GameState {
   };
 }
 
+export interface Representative {
+  id: string;
+  type: 'I' | 'O';
+  top: number;
+  left: number;
+  dx: number;
+  dy: number;
+  size: number;
+  translateX: number;
+  translateY: number;
+}
+
 export const INITIAL_STATE: GameState = {
   emotionalEssence: 0,
   doses: 0,

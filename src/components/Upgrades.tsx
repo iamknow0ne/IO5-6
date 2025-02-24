@@ -1,9 +1,12 @@
 import React from 'react';
 import { Zap } from 'lucide-react';
+import { motion } from 'framer-motion';
+
+import { GameState } from '../types/game';
 
 interface UpgradesProps {
-  state: any;
-  upgradeEfficiency: (type: keyof typeof state.efficiencies) => void;
+  state: GameState;
+  upgradeEfficiency: (type: keyof GameState['efficiencies']) => void;
   handleButtonClick: (event: React.MouseEvent<HTMLButtonElement>) => void;
   handleResourceChange: (resourceName: string, amount: number, elementId: string, icon?: React.ReactNode) => void;
 }
@@ -25,11 +28,16 @@ const Upgrades: React.FC<UpgradesProps> = ({
               upgradeEfficiency(type as keyof typeof state.efficiencies);
               handleResourceChange('Upgrade', 1, 'counter-Essence', <Zap className="w-4 h-4 inline-block" />);
             }}
-            className="bg-gray-800 hover:bg-gray-700 p-3 rounded-lg transition border border-gray-700 group relative"
+            className="bg-gray-800 hover:bg-gray-700 p-3 rounded-lg transition duration-300 ease-in-out transform hover:scale-105 border border-gray-700 group relative"
             disabled={state.emotionalEssence < 40 * (level + 1)}
           >
             <div className="flex items-center justify-between gap-2 mb-1">
-              <Zap className="w-5 h-5 transition-transform group-hover:scale-125" />
+              <motion.div
+  whileHover={{ scale: 1.25 }}
+  transition={{ duration: 0.3 }}
+>
+  <Zap className="w-5 h-5" />
+</motion.div>
               <h3 className="font-semibold capitalize">{type}</h3>
             </div>
             <p className="text-sm">Level {level}</p>
