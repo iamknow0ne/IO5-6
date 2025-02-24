@@ -1,8 +1,8 @@
-# I O 5-6
+# IO5-6
 
 ## Project Overview
 
-"I O 5-6" is a resource management and automation game inspired by Universal Paperclips, themed around the dark and duality-driven concepts from the album IO by the band ten56. The game revolves around numbing the population by distributing a product called "I O 5-6," which strips away emotions and intellect.
+"IO5-6" is a resource management and automation game inspired by Universal Paperclips, themed around the dark and duality-driven concepts from the album IO by the band ten56. The game revolves around numbing the population by distributing a product called "I O 5-6," which strips away emotions and intellect, reflecting the album's exploration of duality (on/off, life/death, feeling/numbness).
 
 ### Core Objective
 

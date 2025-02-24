@@ -6,11 +6,11 @@ Below is a detailed and comprehensive prompt for building the game "I O 5-6". Th
 
 ---
 
-### Prompt for Building "I O 5-6"
+### Prompt for Building "IO5-6"
 
 #### Game Overview
 
-You are tasked with building a game called "I O 5-6". The game is a resource management and automation game inspired by Universal Paperclips, themed around the dark and duality-driven concepts from the album IO by the band ten56. The game's narrative revolves around numbing the population by distributing a product called "I O 5-6," which strips away emotions and intellect, reflecting the album's exploration of duality (on/off, life/death, feeling/numbness).
+You are tasked with building a game called "IO5-6". The game is a resource management and automation game inspired by Universal Paperclips, themed around the dark and duality-driven concepts from the album IO by the band ten56. The game's narrative revolves around numbing the population by distributing a product called "I O 5-6," which strips away emotions and intellect, reflecting the album's exploration of duality (on/off, life/death, feeling/numbness).
 
 **Core Objective**
 

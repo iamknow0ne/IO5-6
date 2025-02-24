@@ -1,4 +1,4 @@
-# Project Roadmap
+# Project Roadmap for IO5-6
 
 ## New Features
 
@@ -22,6 +22,31 @@
    - Status: Completed
    - Estimated Completion: 24/02/2025
    - Note: User prefers the original GUI from version v0.0.0.0.
+
+5. **Feature: Stages of Numbing**
+   - Description: Implement stages of numbing with unique effects and challenges.
+   - Status: Not Started
+   - Estimated Completion: Q3 2025
+
+6. **Feature: Resistance Mechanics**
+   - Description: Add mechanics for managing resistance from The Awakened.
+   - Status: Not Started
+   - Estimated Completion: Q3 2025
+
+7. **Feature: Environmental Changes**
+   - Description: Implement visual and auditory changes as the numbed population grows.
+   - Status: Not Started
+   - Estimated Completion: Q4 2025
+
+8. **Feature: New Items and Upgrades**
+   - Description: Introduce advanced doses, numbing machines, essence extractors, and void amplifiers.
+   - Status: Not Started
+   - Estimated Completion: Q4 2025
+
+9. **Feature: Darkest Concepts**
+   - Description: Implement mechanics that push the game's darkness to its limits.
+   - Status: Not Started
+   - Estimated Completion: Q4 2025
 
 ## Improvements
 
