@@ -24,8 +24,8 @@ import { usePopulationConversion } from '../state/populationConversion';
 export function useGameState() {
   const [state, setState] = useState<GameState>(INITIAL_STATE);
   const [growthAccumulator, setGrowthAccumulator] = useState(0);
-  const [iAccumulator, setIAccumulator] = useState(0); // Accumulator for I
-  const [oAccumulator, setOAccumulator] = useState(0); // Accumulator for O
+  const [iAccumulator, setIAccumulator] = useState(0);
+  const [oAccumulator, setOAccumulator] = useState(0);
 
   usePopulationGrowth({ state, setState, setGrowthAccumulator, setIAccumulator, setOAccumulator });
   useFeatureDiscovery({ state, setState });
@@ -57,7 +57,7 @@ export function useGameState() {
     purchaseAutoProducer,
     upgradeEfficiency,
     purchaseResearch,
-    decreasePopulation, // Expose the new function
+    decreasePopulation,
     convertPopulation
   };
 }

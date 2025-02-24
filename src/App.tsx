@@ -157,7 +157,6 @@ function App() {
     setRepresentatives(newReps);
   }, [state.I, state.O]);
 
-
   // Update representative positions (bouncing) using requestAnimationFrame
   useEffect(() => {
     if (!containerRef.current) return;
@@ -205,7 +204,6 @@ function App() {
               const repTop = (newTop / 100) * containerHeight;
               const otherRepLeft = (otherRep.left / 100) * containerWidth;
               const otherRepTop = (otherRep.top / 100) * containerHeight;
-
 
               if (
                 repLeft < otherRepLeft + otherRep.size &&
@@ -261,8 +259,6 @@ function App() {
       />
     ));
   }, [representatives]);
-
-
 
   return (
     <div className="min-h-screen bg-gray-900 text-white p-6 transition-colors duration-500" style={{ backgroundColor: backgroundColor }}>
@@ -361,6 +357,19 @@ function App() {
           {representativeElements}
         </div>
         <p className="text-center text-gray-400">Population Dynamics</p>
+      </div>
+      {/* Animated Background */}
+      <div className="stars">
+        <div className="star"></div>
+        <div className="star"></div>
+        <div className="star"></div>
+        <div className="star"></div>
+        <div className="star"></div>
+        <div className="star"></div>
+        <div className="star"></div>
+        <div className="star"></div>
+        <div className="star"></div>
+        <div className="star"></div>
       </div>
     </div>
   );

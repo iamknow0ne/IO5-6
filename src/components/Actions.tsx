@@ -20,9 +20,11 @@ const Actions: React.FC<ActionsProps> = ({
   handleButtonClick,
   handleResourceChange
 }) => {
+  const discoveredFeatures = state.discoveredFeatures || {};
+
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-      {state.discoveredFeatures.harvesting && (
+      {discoveredFeatures.harvesting && (
         <button
           onClick={(e) => {
             handleButtonClick(e);
@@ -35,7 +37,7 @@ const Actions: React.FC<ActionsProps> = ({
           Harvest
         </button>
       )}
-      {state.discoveredFeatures.production && (
+      {discoveredFeatures.production && (
         <button
           onClick={(e) => {
             handleButtonClick(e);
@@ -49,7 +51,7 @@ const Actions: React.FC<ActionsProps> = ({
           Produce
         </button>
       )}
-      {state.discoveredFeatures.distribution && (
+      {discoveredFeatures.distribution && (
         <button
           onClick={(e) => {
             handleButtonClick(e);
@@ -64,7 +66,7 @@ const Actions: React.FC<ActionsProps> = ({
           Distribute
         </button>
       )}
-      {state.discoveredFeatures.automation && (
+      {discoveredFeatures.automation && (
         <button
           onClick={(e) => {
             handleButtonClick(e);

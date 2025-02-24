@@ -13,10 +13,10 @@ export const usePopulationGrowth = ({ state, setState, setGrowthAccumulator, set
   useEffect(() => {
     const interval = setInterval(() => {
       setState(prev => {
-        let growthRate = prev.populationGrowthRate / 1000; // Base growth rate (adjust divisor for speed)
+        let growthRate = prev.populationGrowthRate / 100 / 20; // Divide by 20 for 100ms interval
 
         // Exponential growth based on current population
-        let growthFactor = 1 + (prev.I / 500); // Increased impact of I, adjust divisor to control exponentiality
+        let growthFactor = 1 + (prev.I / 1000); // Adjust the divisor to control the rate of exponential growth
         let growth = growthRate * growthFactor;
         let newGrowthAccumulator = prev.growthAccumulator + growth;
         let integerGrowth = Math.floor(newGrowthAccumulator);
@@ -36,7 +36,7 @@ export const usePopulationGrowth = ({ state, setState, setGrowthAccumulator, set
           growthAccumulator: newGrowthAccumulator - integerGrowth
         };
       });
-    }, 20);  // Reduced interval for faster updates
+    }, 50);  // Every 50ms
 
     return () => clearInterval(interval);
   }, [state.populationGrowthRate, state.I, state.growthAccumulator, state.iAccumulator, setState, setGrowthAccumulator, setIAccumulator]);

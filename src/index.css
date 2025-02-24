@@ -53,7 +53,6 @@
         animation-delay: 0.1s; /* Stagger the second sparkle */
     }
 
-
     @keyframes sparkle {
         0% {
             width: 0;
@@ -91,4 +90,25 @@
     opacity: 0;
     transform: translateY(-40px);
   }
+}
+
+/* Modern Background Effect */
+@keyframes gradientAnimation {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+body {
+  background: linear-gradient(270deg, #1a1a1a, #000000, #1a1a1a);
+  background-size: 400% 400%;
+  animation: gradientAnimation 15s ease infinite;
+  overflow: hidden;
+  position: relative;
 }

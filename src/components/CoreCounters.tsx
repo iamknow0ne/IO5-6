@@ -8,7 +8,7 @@ interface CoreCountersProps {
   doses: number;
   distributors: number;
   researchPoints: number;
-  discoveredFeatures: {
+  discoveredFeatures?: {
     harvesting: boolean;
     production: boolean;
     automation: boolean;
@@ -23,7 +23,12 @@ const CoreCounters: React.FC<CoreCountersProps> = ({
   doses,
   distributors,
   researchPoints,
-  discoveredFeatures
+  discoveredFeatures = {
+    harvesting: false,
+    production: false,
+    automation: false,
+    research: false,
+  }
 }) => {
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">

@@ -53,7 +53,7 @@ export const INITIAL_STATE: GameState = {
   distributors: 0,
   autoHarvester: 0,
   autoProducer: 0,
-  populationGrowthRate: 15,
+  populationGrowthRate: 3000,
   growthAccumulator: 0,
   iAccumulator: 0, // New
   oAccumulator: 0, // New

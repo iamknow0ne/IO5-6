@@ -8,8 +8,8 @@ export interface GameState {
   autoProducer: number;
   populationGrowthRate: number;
   growthAccumulator: number;
-  iAccumulator: number; // New
-  oAccumulator: number; // New
+  iAccumulator: number;
+  oAccumulator: number;
   discoveredFeatures: {
     harvesting: boolean;
     production: boolean;
@@ -55,8 +55,8 @@ export const INITIAL_STATE: GameState = {
   autoProducer: 0,
   populationGrowthRate: 15,
   growthAccumulator: 0,
-  iAccumulator: 0, // New
-  oAccumulator: 0, // New
+  iAccumulator: 0,
+  oAccumulator: 0,
   discoveredFeatures: {
     harvesting: false,
     production: false,
