@@ -1,11 +1,12 @@
 import React from 'react';
 import { Brain, TestTube2, Share2, Users, Bot, Factory, Zap, BookOpen, TrendingDown, TrendingUp, AlertTriangle } from 'lucide-react';
 import { motion } from 'framer-motion';
-
 import { GameState } from '../types/game';
+import DebugMenu from './DebugMenu';
 
 interface NewUILayoutProps {
   state: GameState;
+  setState: React.Dispatch<React.SetStateAction<GameState>>;
   harvestEssence: () => void;
   produceDose: () => void;
   distributeDose: () => void;
@@ -24,6 +25,7 @@ interface NewUILayoutProps {
 
 const NewUILayout: React.FC<NewUILayoutProps> = ({
   state,
+  setState,
   harvestEssence,
   produceDose,
   distributeDose,
@@ -40,10 +42,17 @@ const NewUILayout: React.FC<NewUILayoutProps> = ({
   publicOpinionIcon
 }) => {
   const discoveredFeatures = state.discoveredFeatures || {};
+  const [isDebugMenuVisible, setDebugMenuVisible] = React.useState(false);
 
   return (
     <div className="p-6 bg-gray-900 text-white">
       <h1 className="text-3xl font-bold mb-6 text-center">Game UI</h1>
+      <button
+        onClick={() => setDebugMenuVisible(!isDebugMenuVisible)}
+        className="fixed top-4 right-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+      >
+        {isDebugMenuVisible ? 'Hide Debug Menu' : 'Show Debug Menu'}
+      </button>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {/* Actions */}
@@ -289,6 +298,7 @@ const NewUILayout: React.FC<NewUILayoutProps> = ({
           )}
         </div>
       </div>
+      <DebugMenu state={state} setState={setState} isVisible={isDebugMenuVisible} />
     </div>
   );
 };

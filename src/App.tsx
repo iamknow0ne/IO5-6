@@ -7,12 +7,14 @@ import Upgrades from './components/Upgrades';
 import Research from './components/Research';
 import PublicOpinion from './components/PublicOpinion';
 import Events from './components/Events';
+import NewUILayout from './components/NewUILayout';
 import { Representative } from './types/game';
 import { TrendingDown, TrendingUp, ThumbsUp } from 'lucide-react';
 
 function App() {
   const {
     state,
+    setState,
     harvestEssence,
     produceDose,
     distributeDose,
@@ -312,53 +314,25 @@ const representativeElements = useMemo(() => {
           discoveredFeatures={state.discoveredFeatures}
         />
 
-        {/* Actions */}
-        <Actions
+        {/* New UI Layout */}
+        <NewUILayout
           state={state}
+          setState={setState}
           harvestEssence={harvestEssence}
           produceDose={produceDose}
           distributeDose={distributeDose}
           hireDistributor={hireDistributor}
-          handleButtonClick={handleButtonClick}
-          handleResourceChange={handleResourceChange}
-        />
-
-        {/* Automation */}
-        <Automation
-          state={state}
           purchaseAutoHarvester={purchaseAutoHarvester}
           purchaseAutoProducer={purchaseAutoProducer}
-          handleButtonClick={handleButtonClick}
-          handleResourceChange={handleResourceChange}
-        />
-
-        {/* Upgrades */}
-        <Upgrades
-          state={state}
           upgradeEfficiency={upgradeEfficiency}
-          handleButtonClick={handleButtonClick}
-          handleResourceChange={handleResourceChange}
-        />
-
-        {/* Research */}
-        <Research
-          state={state}
-          researchProgress={researchProgress}
-          startResearchProgress={startResearchProgress}
           purchaseResearch={purchaseResearch}
+          startResearchProgress={startResearchProgress}
+          researchProgress={researchProgress}
           handleButtonClick={handleButtonClick}
           handleResourceChange={handleResourceChange}
           setResearchProgress={setResearchProgress}
-        />
-
-        {/* Public Opinion */}
-        <PublicOpinion
-          state={state}
           publicOpinionIcon={publicOpinionIcon}
         />
-
-        {/* Events */}
-        <Events state={state} />
 
         {/* Progress */}
         <div className="bg-gray-800 p-4 rounded-lg border border-gray-700">
