@@ -17,6 +17,12 @@
    - Status: Not Started
    - Estimated Completion: Q3 2025
 
+4. **Feature: Debug Menu**
+   - Description: Add a debug menu to manually interact with all values of the game to inspect different behaviors.
+   - Status: Completed
+   - Estimated Completion: 24/02/2025
+   - Note: User prefers the original GUI from version v0.0.0.0.
+
 ## Improvements
 
 1. **Improvement: Enhanced Automation**
